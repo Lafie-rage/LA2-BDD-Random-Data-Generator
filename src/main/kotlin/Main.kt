@@ -1,9 +1,12 @@
 import data.common.model.Competence
 import data.convertKeywordsToPropositions
 import data.first.model.FirstProposition
+import data.second.model.KeyWord
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 private const val LOREM_IPSUM_PATH = "./src/main/resources/lorem_ipsum.txt"
 private const val DEFAULT_DATE: String = "01/01/2000 00:00:00"
@@ -20,41 +23,65 @@ fun main(args: Array<String>) {
         return
     }
 
-    val propositions = mutableListOf<FirstProposition>()
-
-    // Generate a random data set for each defined models.
-    // The size of the data set depends on the value given as argument when calling the program.
     val dataSetSize = args[0].toInt()
-    val percentageStep = (dataSetSize*0.01).toInt()
-    val begin = System.nanoTime()
-    for(i in 0 until dataSetSize) {
-        propositions.add(getRandomProposition(i, dataSetSize))
-        if(i%percentageStep == 0) {
-            println("Currently ${i/percentageStep}% done... Still in progress...")
+    val numberCoresAvailable = Runtime.getRuntime().availableProcessors()
+    val executor = Executors.newFixedThreadPool(numberCoresAvailable)
+
+    val dataSetSizeForEachThread = dataSetSize/numberCoresAvailable
+
+    println("There's $numberCoresAvailable cores available.")
+    println("Spreading generation on your different cores...")
+
+    val globalProposition = mutableListOf<FirstProposition>()
+    val globalKeyWords = mutableListOf<KeyWord>()
+    val results = mutableListOf<Future<Pair<List<FirstProposition>, List<KeyWord>>>>()
+    for(threadIndex in 0 until numberCoresAvailable) {
+
+        val result = executor.submit<Pair<List<FirstProposition>, List<KeyWord>>> {
+            val propositions = mutableListOf<FirstProposition>()
+
+            // Generate a random data set for each defined models.
+            // The size of the data set depends on the value given as argument when calling the program.
+            val begin = System.nanoTime()
+            println("Generation started on thread $threadIndex")
+            for(i in 0 until dataSetSizeForEachThread) {
+                propositions.add(getRandomProposition(i + (threadIndex * dataSetSizeForEachThread), dataSetSize))
+            }
+            println("Generation done on thread $threadIndex")
+            val end = System.nanoTime()
+            println("First mode generation done after ${(end - begin) / 1_000_000} milliseconds.")
+
+            println("Converting first model to second one...")
+            val keyWords = convertKeywordsToPropositions(propositions)
+            println("Conversion done.")
+
+            return@submit Pair(propositions, keyWords)
         }
+        results.add(result)
     }
-    val end = System.nanoTime()
-    println("First mode generation done after ${(end - begin) / 1_000_000} milliseconds.")
 
-//    getRandomWord()
+    results.forEach { future ->
+        val result = future.get()
+        globalProposition.addAll(result.first)
+        globalKeyWords.addAll(result.second)
+    }
 
-//    println("First model :")
-//    propositions.forEach {
+    println("First model :")
+//    globalProposition.forEach {
 //        println(it)
 //    }
+    println("Size : ${globalProposition.size}")
 
-    println("Converting first model to second one...")
-    val keyWords = convertKeywordsToPropositions(propositions)
-    println("Conversion done.")
 
     println("Second model :")
-//    keyWords.forEach { keyWord ->
+//    globalKeyWords.forEach { keyWord ->
 //        print("Keyword : ${keyWord.keyWord}, [")
 //        keyWord.propositions.forEach { proposition ->
 //            print("${proposition.id}, ")
 //        }
 //        println("]")
 //    }
+    println("Size : ${globalKeyWords.size}")
 }
 
 private fun getRandomProposition(id: Int, dataSetSize: Int): FirstProposition {

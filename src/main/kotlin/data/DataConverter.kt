@@ -1,19 +1,19 @@
 package data
 
-import data.first.model.FirstProposition
+import data.first.model.FirstProposal
 import data.second.model.KeyWord
-import data.second.model.SecondProposition
+import data.second.model.SecondProposals
 
 /**
- * Convert a [List] of [FirstProposition] into a [List] of [KeyWord].
+ * Convert a [List] of [FirstProposal] into a [List] of [KeyWord].
  */
-fun convertKeywordsToPropositions(propositionsFromFirstModel: List<FirstProposition>): List<KeyWord> {
+fun convertKeywordsToProposals(propositionsFromFirstModel: List<FirstProposal>): List<KeyWord> {
     val begin = System.nanoTime()
     val keyWords = propositionsFromFirstModel.flatMap {
         it.keyWord
     }.toSet()
 
-    val propositionsMappedWithKeywords = mutableMapOf<String, List<FirstProposition>>()
+    val propositionsMappedWithKeywords = mutableMapOf<String, List<FirstProposal>>()
     keyWords.forEach { keyWord ->
         propositionsMappedWithKeywords[keyWord] = propositionsFromFirstModel.filter { proposition ->
             proposition.keyWord.contains(keyWord)
@@ -21,7 +21,7 @@ fun convertKeywordsToPropositions(propositionsFromFirstModel: List<FirstProposit
     }
 
     val result = propositionsMappedWithKeywords.map {
-        KeyWord(it.key, it.value.map { proposition -> proposition.asSecondModelProposition() })
+        KeyWord(it.key, it.value.map { proposition -> proposition.asSecondModelProposals() })
     }
 
     val end = System.nanoTime()
@@ -31,10 +31,10 @@ fun convertKeywordsToPropositions(propositionsFromFirstModel: List<FirstProposit
 }
 
 /**
- * Convert a [FirstProposition] into a [SecondProposition].
+ * Convert a [FirstProposal] into a [SecondProposals].
  * Meaning that it removes the keyWord field.
  */
-fun FirstProposition.asSecondModelProposition(): SecondProposition = SecondProposition(
+fun FirstProposal.asSecondModelProposals(): SecondProposals = SecondProposals(
     this.id,
     this.userId,
     this.beginDate,

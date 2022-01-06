@@ -1,6 +1,10 @@
 package data.second.model
 
+import com.google.gson.annotations.SerializedName
+
 data class KeyWord(
+    @SerializedName("keyWord")
     val keyWord: String,
-    val propositions: List<SecondProposition>,
+    @SerializedName("proposals")
+    val proposals: List<SecondProposals>,
 )

@@ -13,7 +13,7 @@ private const val PROPOSALS_PATH = "./src/main/resources/proposals.json"
 private const val KEY_WORDS_PATH = "./src/main/resources/keyWords.json"
 private const val DEFAULT_DATE: String = "01/01/2000 00:00:00"
 private val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
-private val defaultBeforeDate = dateFormat.parse(DEFAULT_DATE)
+private val defaultAfterDate = dateFormat.parse(DEFAULT_DATE)
 private val regexDelimiter = Regex("(([.]*[,]*[ ]|\n)+|[.])")
 private val words = File(LOREM_IPSUM_PATH).readText().split(regexDelimiter).filter { it.isNotBlank() }
 private val random = Random()
@@ -54,7 +54,7 @@ fun main(args: Array<String>) {
                 // third from 10 to 14 and fourth from 15 to 19
                 // The size of the data set for each thread would be 5
                 val id = i + (threadIndex * dataSetSizeForEachThread)
-                proposals.add(getRandomProposition(id, dataSetSize))
+                proposals.add(getRandomFirstProposal(id, dataSetSize))
             }
             println("Generation done on thread $threadIndex")
             val end = System.nanoTime()
@@ -102,7 +102,15 @@ fun main(args: Array<String>) {
     executors.shutdown()
 }
 
-private fun getRandomProposition(id: Int, dataSetSize: Int): FirstProposal {
+/**
+ * Generate a random [FirstProposal] by randomly retrieving the data needed to instantiate it.
+ *
+ * @param id The id of the proposal
+ * @param dataSetSize The size of the data set that you want to generate.
+ *
+ * @return The randomly generated proposal
+ */
+private fun getRandomFirstProposal(id: Int, dataSetSize: Int): FirstProposal {
     val beginDate = getRandomDate()
     return FirstProposal(
         id,
@@ -119,6 +127,14 @@ private fun getRandomProposition(id: Int, dataSetSize: Int): FirstProposal {
     )
 }
 
+/**
+ * Generate a random [Competence] by randomly retrieving the data needed to instantiate it.
+ *
+ * @return The randomly generated competence.
+ *
+ * @see getRandomWord
+ * @see Competence
+ */
 private fun getRandomCompetence(): Competence {
     return Competence(
         competenceCounter++,
@@ -126,6 +142,15 @@ private fun getRandomCompetence(): Competence {
     )
 }
 
+/**
+ * Generate a random list of keyword from [FirstProposal] by retrieving random word.
+ *
+ * @param dataSetSize Size of the data set of [FirstProposal] that you wanted to generate.
+ *
+ * @return The randomly generated list of keywords as a [List] of [String].
+ *
+ * @see getRandomWord
+ */
 private fun getRandomKeyWords(dataSetSize: Int): List<String> {
     val result = mutableSetOf<String>() // Prevent from adding the same word multiple times
     for(i in 0..(0.5*dataSetSize).toInt()) {
@@ -134,34 +159,85 @@ private fun getRandomKeyWords(dataSetSize: Int): List<String> {
     return result.toList()
 }
 
+/**
+ * Retrieve a random word from Lorem Ipsum.
+ *
+ * @return The randomly generated word as [String].
+ *
+ * @see getRandomInteger
+ */
 private fun getRandomWord(): String {
     return words[getRandomInteger(max = words.size - 1)]
 }
 
+/**
+ * Generate a random [Int] value.
+ *
+ * @param min The minimal value accepted for the int.
+ * @param max The maximal value accepted for the int.
+ *
+ * @return The randomly generated int value.
+ *
+ * @see IntRange.random
+ */
 private fun getRandomInteger(min: Int = 0, max: Int): Int {
     return (min..max).random()
 }
 
+/**
+ * Generate a random [Long] value.
+ *
+ * @param min The minimal value accepted for the long.
+ * @param max The maximal value accepted for the long.
+ *
+ * @return The randomly generated long value.
+ *
+ * @see LongRange.random
+ */
 private fun getRandomLong(min: Long, max: Long): Long {
     return (min..max).random()
 }
 
+/**
+ * Generate a random [Boolean] value.
+ *
+ * @return The boolean value.
+ *
+ * @see getRandomInteger
+ */
 private fun getRandomBoolean(): Boolean {
     return (getRandomInteger(max = 1) == 1)
 }
 
-private fun getRandomDate(before: Date = defaultBeforeDate): Date {
+
+/**
+ * Generate a random [Date] object.
+ * This date would always be before the given date or, if non date was transmitted, before [defaultAfterDate].
+ *
+ * @param minDate The minimal accepted date.
+ *
+ * @return The randomly generated date.
+ *
+ * @see getRandomLong
+ * @see defaultAfterDate
+ */
+private fun getRandomDate(minDate: Date = defaultAfterDate): Date {
     val now = Calendar.getInstance().time
     // Remove a random number of ms to now
-    return Date(now.time - getRandomLong(before.time, now.time))
+    return Date(now.time - getRandomLong(minDate.time, now.time))
 }
 
 /**
- * Generate a sentence
+ * Generate a sentence by picking a random number of words from Lorem Ipsum.
+ * The sentence should measure between 20 and 40 words.
+ *
+ * @return A sentence as [String].
+ *
+ * @see getRandomInteger
  */
 private fun getRandomSentences(): String {
     var sentence = ""
-    for(i in 20..40) {
+    for(i in 0..getRandomInteger(20, 40)) {
         sentence += "${getRandomWord()} "
     }
     val sentenceSize = sentence.length
@@ -172,9 +248,11 @@ private fun getRandomSentences(): String {
 
 /**
  * Generate a random [Float] number.
- * The min of the float will always be 0
+ * The min of the float will always be 0.
  *
- * @param max Maximal value of the float.
+ * @param max Maximal value of the float number.
+ *
+ * @return A randomly generated float number.
  */
 private fun getRandomFloat(max: Float): Float {
     return random.nextFloat() * max

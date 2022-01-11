@@ -113,17 +113,17 @@ fun main(args: Array<String>) {
 private fun getRandomFirstProposal(id: Int, dataSetSize: Int): FirstProposal {
     val beginDate = getRandomDate()
     return FirstProposal(
-        id,
-        getRandomInteger(max = dataSetSize),
-        beginDate,
-        getRandomDate(beginDate),
-        getRandomFloat(dataSetSize.toFloat()),
-        getRandomBoolean(),
-        getRandomBoolean(),
-        getRandomWord(),
-        getRandomSentences(),
-        getRandomCompetence(),
-        getRandomKeyWords(dataSetSize),
+        id = id,
+        userId = getRandomInteger(max = dataSetSize),
+        beginDate = beginDate,
+        endDate = getRandomDate(beginDate),
+        value = getRandomFloat(dataSetSize.toFloat()),
+        isGeneric = getRandomBoolean(),
+        isGoods = getRandomBoolean(),
+        name = getRandomWord(),
+        description = getRandomSentences(),
+        competence = getRandomCompetence(),
+        keyWord = getRandomKeyWords(dataSetSize),
     )
 }
 
@@ -153,7 +153,7 @@ private fun getRandomCompetence(): Competence {
  */
 private fun getRandomKeyWords(dataSetSize: Int): List<String> {
     val result = mutableSetOf<String>() // Prevent from adding the same word multiple times
-    for(i in 0..(0.5*dataSetSize).toInt()) {
+    for(i in 0..(0.2*dataSetSize).toInt()) {
         result.add(getRandomWord())
     }
     return result.toList()

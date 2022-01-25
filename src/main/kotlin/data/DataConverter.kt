@@ -1,8 +1,8 @@
 package data
 
-import data.first.model.FirstProposal
-import data.second.model.KeyWord
-import data.second.model.SecondProposals
+import data.propositions.first.model.FirstProposal
+import data.propositions.second.model.KeyWord
+import data.propositions.second.model.SecondProposals
 
 /**
  * Convert a [List] of [FirstProposal] into a [List] of [KeyWord].

@@ -1,7 +1,7 @@
 import com.google.gson.Gson
 import data.common.model.Competence
 import data.convertKeywordsToProposals
-import data.first.model.FirstProposal
+import data.propositions.first.model.FirstProposal
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*

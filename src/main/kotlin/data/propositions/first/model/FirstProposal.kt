@@ -1,4 +1,4 @@
-package data.first.model
+package data.propositions.first.model
 
 import com.google.gson.annotations.SerializedName
 import data.common.model.Competence

@@ -1,4 +1,4 @@
-package data.second.model
+package data.propositions.second.model
 
 import com.google.gson.annotations.SerializedName
 
